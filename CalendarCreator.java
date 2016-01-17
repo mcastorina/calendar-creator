@@ -4,14 +4,14 @@ import java.awt.image.*;
 import javax.imageio.*;
 import java.io.*;
 
-public class CalendarCreator
-{
-    public static void main(String[] args) throws Exception
-    {
+public class CalendarCreator {
+    public static void main(String[] args) throws Exception {
         int beginM, beginY, endM, endY;
         Scanner in = new Scanner(System.in);
-        System.out.println("Enter the begin date in the form followed by the end date in the form month year");
-        System.out.print("Example:\n\tBegin Date: 1 2013\n\tEnd Date: 5 2013\nBegin Date: ");
+        System.out.print("Enter the begin date in the form followed by");
+        System.out.println(" the end date in the form month year\nExample:");
+        System.out.println("\tBegin Date: 1 2013\n\tEnd Date: 5 2013");
+        System.out.print("Begin Date: ");
         String[] begin = in.nextLine().split(" ");
         System.out.print("End Date: ");
         String[] end = in.nextLine().split(" ");
@@ -30,9 +30,9 @@ public class CalendarCreator
             return;
 
         int numCals = (endY - curYear) * 12 + (endM - curMonth) + 1;
-        if (numCals > 12)
-        {
-            System.out.println("This will generate " + ((numCals/2) + (numCals%2)) + " calendars.");
+        if (numCals > 12) {
+            System.out.println("This will generate " + ((numCals/2) +
+                        (numCals%2)) + " calendars.");
             System.out.print("Continue? [y/N]: ");
             String resp = in.nextLine();
             if (resp.length() == 0 || resp.toLowerCase().charAt(0) != 'y')
@@ -40,9 +40,9 @@ public class CalendarCreator
         }
 
         ArrayList<Month> months = new ArrayList<Month>();
-        do
-        {
-            months.add(new Month(curYear, curMonth+1, calendar.get(GregorianCalendar.DAY_OF_WEEK)-1));
+        do {
+            months.add(new Month(curYear, curMonth+1,
+                        calendar.get(GregorianCalendar.DAY_OF_WEEK)-1));
             calendar.add(GregorianCalendar.MONTH,1);
             curMonth = calendar.get(GregorianCalendar.MONTH);
             curYear = calendar.get(GregorianCalendar.YEAR);
@@ -53,11 +53,13 @@ public class CalendarCreator
 
         int boxSizeX = 100;
         int boxSizeY = 70;
-        String[] daysOfWeek = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" ");
+        final String[] daysOfWeek = {"Sunday", "Monday", "Tuesday",
+                                    "Wednesday", "Thursday", "Friday",
+                                    "Saturday"};
 
-        for (int i = 0; i < months.size(); i += 2)
-        {
-            BufferedImage image = new BufferedImage(850, 1100, BufferedImage.TYPE_BYTE_GRAY);
+        for (int i = 0; i < months.size(); i += 2) {
+            BufferedImage image = new BufferedImage(850, 1100,
+                    BufferedImage.TYPE_BYTE_GRAY);
             Graphics g = image.getGraphics();
 
             g.setColor(Color.WHITE);
@@ -66,8 +68,7 @@ public class CalendarCreator
 
             boolean[] days = months.get(i).getDays();
 
-            for (int t = 0; t < 8; ++t)
-            {
+            for (int t = 0; t < 8; ++t) {
                 g.drawLine(75+(t*boxSizeX), 85, 75+(t*boxSizeX), 515);
                 if (t < 7)
                     g.drawString(daysOfWeek[t],75+(t*boxSizeX)+5, 90);
@@ -79,20 +80,18 @@ public class CalendarCreator
             g.drawString(""+months.get(i).getYear(), 749, 60);
 
             int day = 1;
-            for (int p = 0; p < days.length; ++p)
-            {
+            for (int p = 0; p < days.length; ++p) {
                 if (days[p])
-                    g.drawString(""+day++, 75+(p%7)*boxSizeX+5, 95+(p/7)*boxSizeY+15);
+                    g.drawString(""+day++, 75+(p%7)*boxSizeX+5,
+                                           95+(p/7)*boxSizeY+15);
             }
             // g.drawRect(75, 95, 700, 420);
 
-            if (i+1 < months.size())
-            {
+            if (i+1 < months.size()) {
                 // g.drawRect(75, 605, 700, 420);
                 days = months.get(i+1).getDays();
 
-                for (int t = 0; t < 8; ++t)
-                {
+                for (int t = 0; t < 8; ++t) {
                     g.drawLine(75+(t*boxSizeX), 595, 75+(t*boxSizeX), 1025);
                     if (t < 7)
                         g.drawString(daysOfWeek[t],75+(t*boxSizeX)+5, 600);
@@ -104,10 +103,11 @@ public class CalendarCreator
                 g.drawString(""+months.get(i+1).getYear(), 749, 570);
 
                 day = 1;
-                for (int p = 0; p < days.length; ++p)
-                {
-                    if (days[p])
-                        g.drawString(""+day++, 75+(p%7)*boxSizeX+5, 605+(p/7)*boxSizeY+15);
+                for (int p = 0; p < days.length; ++p) {
+                    if (days[p]) {
+                        g.drawString(""+day++, 75+(p%7)*boxSizeX+5,
+                                               605+(p/7)*boxSizeY+15);
+                    }
                 }
             }
 
@@ -116,13 +116,11 @@ public class CalendarCreator
         }
     }
 }
-class Month
-{
+class Month {
     private int year, month;
     boolean[] days;
 
-    public Month(int y, int m, int firstDay)
-    {
+    public Month(int y, int m, int firstDay) {
         year = y;
         month = m;
         int totalDays = daysInMonth(year, month);
@@ -136,22 +134,21 @@ class Month
         while (i < days.length)
             days[i++] = false;
     }
-    public int getYear()
-    {
+    public int getYear() {
         return year;
     }
-    public String getMonth()
-    {
-        return "January February March April May June July August September October November December".split(" ")[month-1];
+    public String getMonth() {
+        final String[] months = {"January", "February", "March",
+                                "April", "May", "June", "July", "August",
+                                "September", "October", "November",
+                                "December"};
+        return months[month-1];
     }
-    public boolean[] getDays()
-    {
+    public boolean[] getDays() {
         return days;
     }
-    public static int daysInMonth(int y, int m)
-    {
-        switch (m)
-        {
+    public static int daysInMonth(int y, int m) {
+        switch (m) {
             case 2:
                 if (isLeapYear(y))
                     return 29;
@@ -165,8 +162,7 @@ class Month
                 return 31;
         }
     }
-    public static boolean isLeapYear(int y)
-    {
+    public static boolean isLeapYear(int y) {
         if (y % 400 == 0)
             return true;
         else if (y % 100 == 0)
