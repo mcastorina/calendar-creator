@@ -4,17 +4,51 @@ import java.awt.image.*;
 import javax.imageio.*;
 import java.io.*;
 
+/* Argument parsing library: https://github.com/cbeust/jcommander */
+import com.beust.jcommander.*;
+
 public class CalendarCreator {
+    @Parameter(names = {"--begin", "-b"}, description = "Begin month and year")
+    public String arg_begin;
+    @Parameter(names = {"--end", "-e"}, description = "End month and year")
+    public String arg_end;
+    @Parameter(names = {"--force", "-f"}, description = "Ignore warnings")
+    public boolean arg_force = false;
+    @Parameter(names = {"--help", "-h"}, description = "Display help message")
+    public boolean arg_help = false;
+
     public static void main(String[] args) throws Exception {
+        CalendarCreator cc = new CalendarCreator();
+        new JCommander(cc, args);
+
+        cc.run();
+    }
+
+    public void run() throws Exception {
+        if (arg_begin == null || arg_end == null)
+            arg_help = true;
+        if (arg_help || ((arg_begin.length() & arg_end.length()) == 0)) {
+            String gc = "\n\tGenerate calendars for ";
+            String jc = "\t$ java -jar CalendarCreator.jar ";
+            System.out.print("Usage: java CalendarCreator [OPTIONS]");
+            System.out.println(" (--begin|-b) MM_YYYY (--end|-e) MM_YYYY");
+            System.out.println("\nOptions\n");
+            System.out.println("\t-f, --force\t\tIgnore warnings");
+            System.out.println("\t-h, --help\t\tDisplay this help message");
+            System.out.println("\nExamples");
+            System.out.println(gc + "through May 2013");
+            System.out.println(jc + "--begin 1_2013 --end 5_2013");
+            System.out.println(gc + "the year of 2014");
+            System.out.println(jc + "--begin 1_2014 --end 12_2014");
+            System.out.println(gc + "the years of 2013 and 2014");
+            System.out.println(jc + "--force --begin 1_2013 --end 12_2014");
+            System.out.println();
+            return;
+        }
+
         int beginM, beginY, endM, endY;
-        Scanner in = new Scanner(System.in);
-        System.out.print("Enter the begin date in the form followed by");
-        System.out.println(" the end date in the form month year\nExample:");
-        System.out.println("\tBegin Date: 1 2013\n\tEnd Date: 5 2013");
-        System.out.print("Begin Date: ");
-        String[] begin = in.nextLine().split(" ");
-        System.out.print("End Date: ");
-        String[] end = in.nextLine().split(" ");
+        String[] begin = arg_begin.split("_");
+        String[] end = arg_end.split("_");
 
         beginM = Integer.parseInt(begin[0])-1;
         beginY = Integer.parseInt(begin[1]);
@@ -22,15 +56,21 @@ public class CalendarCreator {
         endM = Integer.parseInt(end[0])-1;
         endY = Integer.parseInt(end[1]);
 
+        /* Get the current month and year */
         GregorianCalendar calendar = new GregorianCalendar(beginY, beginM, 1);
         int curYear = calendar.get(GregorianCalendar.YEAR);
         int curMonth = calendar.get(GregorianCalendar.MONTH);
 
-        if (curYear > endY || curYear == endY && curMonth > endM)
+        if (curYear > endY || curYear == endY && curMonth > endM) {
+            System.out.println("End date is before begin date.");
+            System.out.println("Aborting.");
             return;
+        }
 
+        /* Check the number of months we'll be generating */
         int numCals = (endY - curYear) * 12 + (endM - curMonth) + 1;
-        if (numCals > 12) {
+        if (!arg_force && numCals > 12) {
+            Scanner in = new Scanner(System.in);
             System.out.println("This will generate " + ((numCals/2) +
                         (numCals%2)) + " calendars.");
             System.out.print("Continue? [y/N]: ");
@@ -39,6 +79,7 @@ public class CalendarCreator {
                 return;
         }
 
+        /* Make ArrayList of months */
         ArrayList<Month> months = new ArrayList<Month>();
         do {
             months.add(new Month(curYear, curMonth+1,
@@ -49,6 +90,7 @@ public class CalendarCreator {
         }
         while (curYear <= endY && (curMonth <= endM || curYear != endY));
 
+        /* Render the calendars */
         System.out.println("Generating calendars...");
 
         int boxSizeX = 100;
